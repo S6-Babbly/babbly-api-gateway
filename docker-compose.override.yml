@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5010:80"
+    volumes:
+      - ./babbly-api-gateway:/app/config
+    networks:
+      - babbly-network
+
+networks:
+  babbly-network:
+    driver: bridge 

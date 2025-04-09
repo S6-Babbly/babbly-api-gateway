@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  # A standalone nginx container that serves mock responses for all services
+  mock-api:
+    image: nginx:alpine
+    ports:
+      - "5010:80"
+    volumes:
+      - ./mocks/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+networks:
+  babbly-network:
+    driver: bridge 

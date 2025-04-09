@@ -8,5 +8,48 @@ services:
     ports:
       - "5010:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped 
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    networks:
+      - babbly-network
+    depends_on:
+      - babbly-post-service
+      - babbly-user-service
+      - babbly-comment-service
+      - babbly-like-service
+
+  babbly-post-service:
+    image: babbly-post-service:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    networks:
+      - babbly-network
+
+  babbly-user-service:
+    image: babbly-user-service:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    networks:
+      - babbly-network
+
+  babbly-comment-service:
+    image: babbly-comment-service:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    networks:
+      - babbly-network
+    
+  babbly-like-service:
+    image: babbly-like-service:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    networks:
+      - babbly-network
+
+networks:
+  babbly-network:
+    driver: bridge 

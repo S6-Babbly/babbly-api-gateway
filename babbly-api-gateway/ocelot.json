@@ -5,8 +5,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/posts/{everything}",
@@ -17,8 +17,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/posts",
@@ -29,8 +29,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/posts/{id}",
@@ -41,8 +41,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/posts/popular",
@@ -53,8 +53,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/posts/user/{userId}",
@@ -65,8 +65,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-user-service",
-          "Port": 80
+          "Host": "user-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/users/{everything}",
@@ -77,8 +77,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-comment-service",
-          "Port": 80
+          "Host": "comment-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/comments/{everything}",
@@ -89,8 +89,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes",
@@ -101,8 +101,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/unlike",
@@ -113,8 +113,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/post/{postId}",
@@ -125,8 +125,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/post/{postId}/count",
@@ -137,8 +137,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/post/{postId}/users",
@@ -149,8 +149,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/user/{userId}",
@@ -161,8 +161,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/user/{userId}/posts",
@@ -173,8 +173,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/likes/check",
@@ -185,8 +185,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-post-service",
-          "Port": 80
+          "Host": "post-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/health/posts",
@@ -197,8 +197,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-user-service",
-          "Port": 80
+          "Host": "user-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/health/users",
@@ -209,8 +209,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-comment-service",
-          "Port": 80
+          "Host": "comment-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/health/comments",
@@ -221,8 +221,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "babbly-like-service",
-          "Port": 80
+          "Host": "like-service",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/health/likes",
@@ -230,6 +230,8 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5010"
+    "BaseUrl": "http://localhost:5010",
+    "RequestIdKey": "OcRequestId",
+    "UseServiceDiscovery": false
   }
 } 

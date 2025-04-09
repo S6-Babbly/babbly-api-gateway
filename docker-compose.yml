@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5010:80"
+      - "5010:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - babbly-network
@@ -21,7 +21,7 @@ services:
   babbly-post-service:
     image: babbly-post-service:latest
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - babbly-network
@@ -29,7 +29,7 @@ services:
   babbly-user-service:
     image: babbly-user-service:latest
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - babbly-network
@@ -37,7 +37,7 @@ services:
   babbly-comment-service:
     image: babbly-comment-service:latest
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - babbly-network
@@ -45,7 +45,7 @@ services:
   babbly-like-service:
     image: babbly-like-service:latest
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
     restart: unless-stopped
     networks:
       - babbly-network

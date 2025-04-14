@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'babbly-api-gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api-gateway:8080']
+
+  - job_name: 'users-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['mock-users-service:5001']
+
+  - job_name: 'posts-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['mock-posts-service:5002']
+
+  - job_name: 'comments-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['mock-comments-service:5003']
+
+  - job_name: 'likes-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['mock-likes-service:5004'] 

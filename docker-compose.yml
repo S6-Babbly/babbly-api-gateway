@@ -6,50 +6,106 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5010:8080"
+      - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
-    networks:
-      - babbly-network
+      - Elasticsearch__Uri=http://elasticsearch:9200
     depends_on:
-      - babbly-post-service
-      - babbly-user-service
-      - babbly-comment-service
-      - babbly-like-service
-
-  babbly-post-service:
-    image: babbly-post-service:latest
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
+      - elasticsearch
+    volumes:
+      - ./logs:/app/logs
     networks:
       - babbly-network
 
-  babbly-user-service:
-    image: babbly-user-service:latest
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - babbly-network
 
-  babbly-comment-service:
-    image: babbly-comment-service:latest
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.1
+    ports:
+      - "5601:5601"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
     networks:
       - babbly-network
-    
-  babbly-like-service:
-    image: babbly-like-service:latest
+
+  # Mock services for development
+  mock-users-service:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    # This is a placeholder - replace with your actual mock service when available
+    command: ["sh", "-c", "echo 'Mock users service running on port 5001' && sleep infinity"]
+    ports:
+      - "5001:5001"
+    networks:
+      - babbly-network
+
+  mock-posts-service:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    # This is a placeholder - replace with your actual mock service when available
+    command: ["sh", "-c", "echo 'Mock posts service running on port 5002' && sleep infinity"]
+    ports:
+      - "5002:5002"
+    networks:
+      - babbly-network
+
+  mock-comments-service:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    # This is a placeholder - replace with your actual mock service when available
+    command: ["sh", "-c", "echo 'Mock comments service running on port 5003' && sleep infinity"]
+    ports:
+      - "5003:5003" 
+    networks:
+      - babbly-network
+
+  mock-likes-service:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    # This is a placeholder - replace with your actual mock service when available
+    command: ["sh", "-c", "echo 'Mock likes service running on port 5004' && sleep infinity"]
+    ports:
+      - "5004:5004"
+    networks:
+      - babbly-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - babbly-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    restart: unless-stopped
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
     networks:
       - babbly-network
 
 networks:
   babbly-network:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+  elasticsearch-data:
+  prometheus-data:
+  grafana-data: 

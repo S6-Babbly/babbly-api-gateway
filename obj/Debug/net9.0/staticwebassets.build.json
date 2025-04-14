@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "NwAYnB6Yau3vFhgmOGH8GeqzBAf5mtG7FtHNOzsbefU=",
+  "Source": "babbly-api-gateway",
+  "BasePath": "_content/babbly-api-gateway",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

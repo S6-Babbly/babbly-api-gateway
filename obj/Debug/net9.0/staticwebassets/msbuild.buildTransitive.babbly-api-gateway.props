@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\babbly-api-gateway.props" />
+</Project>

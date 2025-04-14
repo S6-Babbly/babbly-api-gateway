@@ -1,110 +1,135 @@
 # Babbly API Gateway
 
-This is the API Gateway for the Babbly microservices architecture.
+This API Gateway serves as the central entry point for the Babbly social media platform microservices.
 
-## Development Environment
+## Features
 
-For development purposes, you can run the API Gateway with mock microservices. This allows you to work on and test the API Gateway without needing to run the actual microservices.
-
-### Prerequisites
-
-- Docker
-- Docker Compose
-
-### Running the API Gateway with Mock Services
-
-1. Clone this repository:
-   ```
-   git clone https://github.com/your-organization/babbly-api-gateway.git
-   cd babbly-api-gateway
-   ```
-
-2. Run the development docker-compose file:
-   ```
-   docker-compose -f docker-compose-dev.yml up -d
-   ```
-
-3. The API Gateway will be available at http://localhost:5010
-
-### Mock Services
-
-The development environment uses Stoplight Prism to mock the following microservices:
-
-- Post Service (http://localhost:5000)
-- User Service (http://localhost:5001)
-- Comment Service (http://localhost:5002)
-- Like Service (http://localhost:5003)
-
-Each mock service will return pre-defined positive responses for all endpoints configured in the Ocelot routing.
-
-### Health Checks
-
-You can verify the API Gateway is running correctly by accessing the health endpoint:
-
-```
-GET http://localhost:5010/health
-```
-
-To check the status of all mock services:
-
-```
-GET http://localhost:5010/health/services
-```
-
-### Testing Specific Endpoints
-
-You can test the API Gateway routes with tools like curl, Postman, or the VS Code REST Client. For example:
-
-```
-# Get posts
-GET http://localhost:5010/api/posts
-
-# Get a specific post
-GET http://localhost:5010/api/posts/post-123456
-
-# Get likes for a post
-GET http://localhost:5010/api/likes/post/post-123456
-```
-
-### Stopping the Development Environment
-
-To stop the development environment:
-
-```
-docker-compose -f docker-compose-dev.yml down
-```
-
-## Development and Testing
-
-### Using Mock Services
-
-For development and testing without requiring the real microservices, you can use the included mock services:
-
-```bash
-docker-compose -f docker-compose.dev.yml up -d
-```
-
-This will start a stand-alone Nginx container that serves mock responses for all the Babbly microservices at http://localhost:5010.
-
-For more information about the mock services, see the [mocks/README.md](mocks/README.md) file.
-
-## Production Environment
-
-For production use, the API Gateway should be run with the actual microservices:
-
-```
-docker-compose up -d
-```
+- **Reverse Proxy**: Routes traffic to the appropriate microservices
+- **Authentication**: JWT-based authentication using Auth0
+- **Rate Limiting**: Protects APIs from excessive traffic
+- **Aggregation**: Combines data from multiple microservices into unified responses
+- **Metrics**: Prometheus integration for monitoring
 
 ## Architecture
 
-The API Gateway uses Ocelot to route requests to the appropriate microservices:
+The API Gateway connects to the following microservices:
+- User Service (localhost:5001)
+- Post Service (localhost:5002)
+- Comment Service (localhost:5003)
+- Like Service (localhost:5004)
 
-- Post Service: Handles post creation, retrieval, updates, and deletion
-- User Service: Manages user accounts and authentication
-- Comment Service: Handles post comments
-- Like Service: Manages likes on posts
+## Development Mode
 
-## Configuration
+The gateway can be run in two modes:
+1. **Mock Mode**: Uses mock data without actual microservices (default)
+2. **Real Mode**: Connects to actual microservices
 
-The API Gateway routes are configured in the `ocelot.json` and `ocelot.Development.json` files. 
+To toggle between modes, change the `UseMockServices` flag in `appsettings.json`:
+
+```json
+"UseMockServices": true  // Set to false to use real microservices
+```
+
+## Endpoints
+
+### Direct Proxied Endpoints
+- `/api/users/*` → User Service
+- `/api/posts/*` → Post Service
+- `/api/comments/*` → Comment Service
+- `/api/likes/*` → Like Service
+
+### Aggregated Endpoints
+- `/api/feed` - Get the latest posts with comments and likes
+- `/api/feed/{postId}` - Get details for a specific post
+- `/api/profiles/id/{userId}` - Get a user profile by ID
+- `/api/profiles/username/{username}` - Get a user profile by username
+- `/api/profiles/me` - Get the authenticated user's profile
+
+## Setup
+
+### Prerequisites
+- .NET 9.0 SDK
+
+### Running the Project Locally
+```bash
+# Build the project
+dotnet build
+
+# Run the project
+dotnet run
+```
+
+The API will be available at http://localhost:5224 by default.
+
+### Running with Docker
+
+To run the gateway with Docker:
+
+```bash
+# Build the Docker image
+docker build -t babbly-api-gateway .
+
+# Run the container
+docker run -p 5010:8080 babbly-api-gateway
+```
+
+### Running the Complete Application with Docker Compose
+
+To run the entire Babbly application with all microservices:
+
+```bash
+# Navigate to the root directory containing docker-compose.yml
+cd ..
+
+# Start all services
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f api-gateway
+```
+
+When running with Docker Compose, the API Gateway will be available at http://localhost:5010 and automatically configured to use the real microservices.
+
+## Authentication
+
+To test authenticated endpoints, provide a valid JWT token in the Authorization header:
+```
+Authorization: Bearer your-token-here
+```
+
+In mock mode, authentication is simulated but you still need to provide a token to test authenticated endpoints.
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+### Automated Workflow
+
+1. **Build & Test**: On every push and PR to `main` and `develop` branches
+   - Builds the application
+   - Runs all tests
+   - Collects code coverage
+
+2. **SonarCloud Analysis**: Code quality and security scanning
+   - Analyzes code for bugs, vulnerabilities, and code smells
+   - Enforces coding standards
+   - Tracks code coverage
+
+3. **Docker Image**: Builds and pushes to Docker Hub
+   - Creates a container image with the latest code
+   - Tags with branch name, commit SHA, and 'latest'
+   - Pushes to Docker Hub registry for easy deployment
+
+### Local Development with Observability
+
+Run the complete stack with logging and monitoring:
+
+```bash
+# Start the development environment with ELK stack and Prometheus/Grafana
+docker-compose up -d
+
+# Access monitoring tools
+Kibana: http://localhost:5601
+Prometheus: http://localhost:9090
+Grafana: http://localhost:3000
+``` 

@@ -1,13 +1,12 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["babbly-api-gateway/babbly-api-gateway.csproj", "babbly-api-gateway/"]
-RUN dotnet restore "babbly-api-gateway/babbly-api-gateway.csproj"
+COPY ["babbly-api-gateway.csproj", "./"]
+RUN dotnet restore "babbly-api-gateway.csproj"
 COPY . .
-WORKDIR "/src/babbly-api-gateway"
 RUN dotnet build "babbly-api-gateway.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -71,10 +71,15 @@ jobs:
             -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
             -Dsonar.cs.analyzer.projectOutPaths=.
 
-  docker-build-push:
-    needs: sonarcloud-analysis
+  docker-build:
+    name: Docker Build and Publish
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    needs: [build-and-test, sonarcloud-analysis]
+    if: |
+      always() &&
+      (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped') &&
+      (needs.sonarcloud-analysis.result == 'success' || needs.sonarcloud-analysis.result == 'skipped') &&
+      github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
@@ -82,27 +87,25 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKER_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            latest
+      - name: Create .env file
+        run: |
+          echo "ASPNETCORE_ENVIRONMENT=Development" > .env
+          echo "ConnectionStrings__DefaultConnection=Host=db;Database=babbly-posts;Username=babbly_user;Password=babbly_password;" >> .env
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max 
+      - name: Build and push Backend
+        run: |
+          # Always build the image
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }} .
+
+          # Only push to DockerHub on main branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            docker tag ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:latest
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }}
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:latest
+          fi 

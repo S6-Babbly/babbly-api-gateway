@@ -41,38 +41,38 @@ services:
     networks:
       - babbly-network
 
-  # Mock services for development
-  mock-users-service:
+  # Services for development
+  users-service:
     image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual mock service when available
-    command: ["sh", "-c", "echo 'Mock users service running on port 5001' && sleep infinity"]
+    # This is a placeholder - replace with your actual service when available
+    command: ["sh", "-c", "echo 'Users service running on port 5001' && sleep infinity"]
     ports:
       - "5001:5001"
     networks:
       - babbly-network
 
-  mock-posts-service:
+  posts-service:
     image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual mock service when available
-    command: ["sh", "-c", "echo 'Mock posts service running on port 5002' && sleep infinity"]
+    # This is a placeholder - replace with your actual service when available
+    command: ["sh", "-c", "echo 'Posts service running on port 5002' && sleep infinity"]
     ports:
       - "5002:5002"
     networks:
       - babbly-network
 
-  mock-comments-service:
+  comments-service:
     image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual mock service when available
-    command: ["sh", "-c", "echo 'Mock comments service running on port 5003' && sleep infinity"]
+    # This is a placeholder - replace with your actual service when available
+    command: ["sh", "-c", "echo 'Comments service running on port 5003' && sleep infinity"]
     ports:
       - "5003:5003" 
     networks:
       - babbly-network
 
-  mock-likes-service:
+  likes-service:
     image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual mock service when available
-    command: ["sh", "-c", "echo 'Mock likes service running on port 5004' && sleep infinity"]
+    # This is a placeholder - replace with your actual service when available
+    command: ["sh", "-c", "echo 'Likes service running on port 5004' && sleep infinity"]
     ports:
       - "5004:5004"
     networks:

@@ -6,7 +6,6 @@ C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\ne
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\babbly-api-gateway.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\babbly-api-gateway.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\babbly-api-gateway.sourcelink.json
-C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\appsettings.json
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\babbly-api-gateway.staticwebassets.endpoints.json
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\babbly-api-gateway.exe
@@ -49,3 +48,19 @@ C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\ne
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\babbly-api-gateway.pdb
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\babbly-api-gateway.genruntimeconfig.cache
 C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\obj\Debug\net9.0\ref\babbly-api-gateway.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Elasticsearch.Net.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.AspNetCore.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Enrichers.Environment.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Exceptions.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Extensions.Hosting.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Extensions.Logging.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Formatting.Compact.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Formatting.Elasticsearch.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Settings.Configuration.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Sinks.Console.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Sinks.Debug.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Sinks.Elasticsearch.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Sinks.File.dll
+C:\Users\nowtu\Documents\git\babbly orginisation\babbly-api-gateway\bin\Debug\net9.0\Serilog.Sinks.PeriodicBatching.dll

@@ -1,6 +1,5 @@
 using AspNetCoreRateLimit;
 using babbly_api_gateway.Aggregators;
-using babbly_api_gateway.Middleware;
 using babbly_api_gateway.Services;
 using Prometheus;
 using Serilog;
@@ -26,9 +25,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-// Configure JWT Authentication
-builder.Services.AddJwtAuthentication(builder.Configuration);
-
 // Configure Rate Limiting
 builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
@@ -41,6 +37,11 @@ builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddHttpClient("UserService", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:users-cluster:Destinations:users-service:Address")!);
+});
+
+builder.Services.AddHttpClient("AuthService", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:auth-cluster:Destinations:auth-service:Address")!);
 });
 
 builder.Services.AddHttpClient("PostService", client =>
@@ -60,6 +61,7 @@ builder.Services.AddHttpClient("LikeService", client =>
 
 // Register Services
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
@@ -86,12 +88,6 @@ app.UseHttpMetrics();
 
 // Rate limiting
 app.UseIpRateLimiting();
-
-// JWT Authentication
-app.UseJwtAuthentication();
-
-// Current user extraction
-app.UseCurrentUser();
 
 // Map controllers
 app.MapControllers();

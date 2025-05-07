@@ -1,0 +1,50 @@
+2025-05-07 12:53:21.563 +02:00 [INF] Loading proxy data from config.
+2025-05-07 12:55:40.880 +02:00 [INF] Loading proxy data from config.
+2025-05-07 12:55:57.582 +02:00 [INF] HTTP GET / responded 404 in 16.0357 ms
+2025-05-07 12:55:58.839 +02:00 [INF] HTTP GET / responded 404 in 0.6847 ms
+2025-05-07 12:55:59.012 +02:00 [INF] HTTP GET / responded 404 in 0.1355 ms
+2025-05-07 12:55:59.186 +02:00 [INF] HTTP GET / responded 404 in 0.1542 ms
+2025-05-07 12:55:59.370 +02:00 [INF] HTTP GET / responded 404 in 0.2189 ms
+2025-05-07 12:55:59.536 +02:00 [INF] HTTP GET / responded 404 in 0.1989 ms
+2025-05-07 12:56:00.070 +02:00 [INF] HTTP GET / responded 404 in 0.1530 ms
+2025-05-07 12:56:14.657 +02:00 [INF] HTTP GET /health responded 200 in 18.2773 ms
+2025-05-07 12:56:14.690 +02:00 [INF] HTTP GET /favicon.ico responded 404 in 0.1263 ms
+2025-05-07 12:56:29.652 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:56:33.724 +02:00 [WRN] "Request": An error was encountered before receiving a response.
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8080)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Yarp.ReverseProxy.Forwarder.HttpForwarder.SendAsync(HttpContext context, String destinationPrefix, HttpMessageInvoker httpClient, ForwarderRequestConfig requestConfig, HttpTransformer transformer, CancellationToken cancellationToken)
+2025-05-07 12:56:33.747 +02:00 [ERR] HTTP GET /api/posts/health responded 502 in 4109.7518 ms
+2025-05-07 12:57:27.283 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:27.333 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:27.337 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 54.1548 ms
+2025-05-07 12:57:34.884 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:34.924 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:34.925 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 41.1641 ms
+2025-05-07 12:57:35.409 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:35.413 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:35.414 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 5.4314 ms
+2025-05-07 12:57:35.604 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:35.607 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:35.608 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 3.5816 ms
+2025-05-07 12:57:35.797 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:35.800 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:35.801 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 3.4107 ms
+2025-05-07 12:57:35.997 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:35.999 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:36.000 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 3.6657 ms
+2025-05-07 12:57:36.171 +02:00 [INF] Proxying to http://localhost:8080/api/posts/health HTTP/2 RequestVersionOrLower 
+2025-05-07 12:57:36.173 +02:00 [INF] Received HTTP/1.1 response 404.
+2025-05-07 12:57:36.174 +02:00 [INF] HTTP GET /api/posts/health responded 404 in 3.3116 ms

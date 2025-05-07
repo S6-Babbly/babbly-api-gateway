@@ -4,7 +4,8 @@ namespace babbly_api_gateway.Services;
 
 public interface ILikeService
 {
-    Task<List<Like>> GetLikesByPostId(Guid postId, int page = 1, int pageSize = 50);
-    Task<List<Like>> GetLikesByUserId(Guid userId, int page = 1, int pageSize = 50);
+    Task<List<Like>> GetLikesByPostId(Guid postId);
+    Task<List<Like>> GetLikesByPostId(Guid postId, int page, int pageSize);
+    Task<List<Like>> GetLikesByUserId(Guid userId);
     Task<bool> HasUserLikedPost(Guid userId, Guid postId);
 } 

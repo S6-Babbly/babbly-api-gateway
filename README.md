@@ -5,7 +5,6 @@ This API Gateway serves as the central entry point for the Babbly social media p
 ## Features
 
 - **Reverse Proxy**: Routes traffic to the appropriate microservices
-- **Authentication**: JWT-based authentication using Auth0
 - **Rate Limiting**: Protects APIs from excessive traffic
 - **Aggregation**: Combines data from multiple microservices into unified responses
 - **Metrics**: Prometheus integration for monitoring
@@ -17,18 +16,6 @@ The API Gateway connects to the following microservices:
 - Post Service (localhost:5002)
 - Comment Service (localhost:5003)
 - Like Service (localhost:5004)
-
-## Development Mode
-
-The gateway can be run in two modes:
-1. **Mock Mode**: Uses mock data without actual microservices (default)
-2. **Real Mode**: Connects to actual microservices
-
-To toggle between modes, change the `UseMockServices` flag in `appsettings.json`:
-
-```json
-"UseMockServices": true  // Set to false to use real microservices
-```
 
 ## Endpoints
 
@@ -43,7 +30,6 @@ To toggle between modes, change the `UseMockServices` flag in `appsettings.json`
 - `/api/feed/{postId}` - Get details for a specific post
 - `/api/profiles/id/{userId}` - Get a user profile by ID
 - `/api/profiles/username/{username}` - Get a user profile by username
-- `/api/profiles/me` - Get the authenticated user's profile
 
 ## Setup
 
@@ -88,16 +74,7 @@ docker-compose up -d
 docker-compose logs -f api-gateway
 ```
 
-When running with Docker Compose, the API Gateway will be available at http://localhost:5010 and automatically configured to use the real microservices.
-
-## Authentication
-
-To test authenticated endpoints, provide a valid JWT token in the Authorization header:
-```
-Authorization: Bearer your-token-here
-```
-
-In mock mode, authentication is simulated but you still need to provide a token to test authenticated endpoints.
+When running with Docker Compose, the API Gateway will be available at http://localhost:5010.
 
 ## CI/CD Pipeline
 

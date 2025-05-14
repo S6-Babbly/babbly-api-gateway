@@ -1,103 +1,150 @@
 version: '3.8'
 
 services:
+  # API Gateway
   api-gateway:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "5010:8080"
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AUTH0_DOMAIN=${AUTH0_DOMAIN}
+      - AUTH0_AUDIENCE=${AUTH0_AUDIENCE}
+    networks:
+      - babbly-network
+    depends_on:
+      - post-service
+      - user-service
+      - comment-service
+      - like-service
+      - auth-service
+
+  # Auth Service
+  auth-service:
+    image: babbly-auth-service:latest
+    container_name: auth-service
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AUTH0_DOMAIN=${AUTH0_DOMAIN}
+      - AUTH0_AUDIENCE=${AUTH0_AUDIENCE}
+    restart: unless-stopped
+    networks:
+      - babbly-network
+
+  # User Service
+  user-service:
+    image: babbly-user-service:latest
+    container_name: user-service
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=user-db;Database=babbly-users;Username=${POSTGRES_USER:-babbly_user};Password=${POSTGRES_PASSWORD:-babbly_password};
+    volumes:
+      - ./user-service-data:/app/data
+    restart: unless-stopped
+    networks:
+      - babbly-network
+    depends_on:
+      - user-db
+
+  user-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=babbly-users
+      - POSTGRES_USER=babbly_user
+      - POSTGRES_PASSWORD=babbly_password
+      - POSTGRES_SHARED_BUFFERS=128MB
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U babbly_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - babbly-network
+
+  # Post Service
+  post-service:
+    image: babbly-post-service:latest
+    container_name: post-service
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Elasticsearch__Uri=http://elasticsearch:9200
+      - CassandraHosts=cassandra
+      - CassandraKeyspace=babbly_posts
+      - CassandraUsername=cassandra
+      - CassandraPassword=cassandra
+    restart: unless-stopped
+    networks:
+      - babbly-network
     depends_on:
-      - elasticsearch
-    volumes:
-      - ./logs:/app/logs
+      cassandra:
+        condition: service_healthy
+        
+  # Comment Service
+  comment-service:
+    image: babbly-comment-service:latest
+    container_name: comment-service
+    ports:
+      - "8082:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CassandraHosts=cassandra
+      - CassandraKeyspace=babbly_comments
+      - CassandraUsername=cassandra
+      - CassandraPassword=cassandra
+    restart: unless-stopped
     networks:
       - babbly-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - babbly-network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.1
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
-      - elasticsearch
-    networks:
-      - babbly-network
+      cassandra:
+        condition: service_healthy
 
-  # Services for development
-  users-service:
-    image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual service when available
-    command: ["sh", "-c", "echo 'Users service running on port 5001' && sleep infinity"]
+  # Like Service
+  like-service:
+    image: babbly-like-service:latest
+    container_name: like-service
     ports:
-      - "5001:5001"
-    networks:
-      - babbly-network
-
-  posts-service:
-    image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual service when available
-    command: ["sh", "-c", "echo 'Posts service running on port 5002' && sleep infinity"]
-    ports:
-      - "5002:5002"
-    networks:
-      - babbly-network
-
-  comments-service:
-    image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual service when available
-    command: ["sh", "-c", "echo 'Comments service running on port 5003' && sleep infinity"]
-    ports:
-      - "5003:5003" 
-    networks:
-      - babbly-network
-
-  likes-service:
-    image: mcr.microsoft.com/dotnet/aspnet:9.0
-    # This is a placeholder - replace with your actual service when available
-    command: ["sh", "-c", "echo 'Likes service running on port 5004' && sleep infinity"]
-    ports:
-      - "5004:5004"
-    networks:
-      - babbly-network
-
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    networks:
-      - babbly-network
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
+      - "8083:8080"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-data:/var/lib/grafana
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CassandraHosts=cassandra
+      - CassandraKeyspace=babbly_likes
+      - CassandraUsername=cassandra
+      - CassandraPassword=cassandra
+    restart: unless-stopped
+    networks:
+      - babbly-network
     depends_on:
-      - prometheus
+      cassandra:
+        condition: service_healthy
+
+  # Consolidated Cassandra for all services
+  cassandra:
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=babbly_cluster
+      - MAX_HEAP_SIZE=1024M
+      - HEAP_NEWSIZE=256M
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
     networks:
       - babbly-network
 
@@ -106,6 +153,5 @@ networks:
     driver: bridge
 
 volumes:
-  elasticsearch-data:
-  prometheus-data:
-  grafana-data: 
+  cassandra_data:
+  user_postgres_data: 

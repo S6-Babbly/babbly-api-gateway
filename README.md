@@ -109,4 +109,113 @@ docker-compose up -d
 Kibana: http://localhost:5601
 Prometheus: http://localhost:9090
 Grafana: http://localhost:3000
+```
+
+## Authentication with Auth0
+
+The API Gateway integrates with Auth0 for secure authentication:
+
+### Configuration
+
+The gateway accepts Auth0 configuration either through environment variables or the configuration file:
+
+```
+# Environment Variables
+AUTH0_DOMAIN=your-tenant.auth0.com
+AUTH0_AUDIENCE=https://api.babbly.com
+```
+
+Or in `appsettings.json`:
+
+```json
+"Auth0": {
+  "Domain": "your-tenant.auth0.com",
+  "Audience": "https://api.babbly.com"
+}
+```
+
+### Token Validation
+
+The gateway performs token validation at two levels:
+
+1. **Full validation**: The ASP.NET Core authentication middleware performs complete validation of JWT tokens, including signature verification.
+
+2. **Basic validation**: A custom middleware (`TokenValidationMiddleware`) performs basic validation of tokens for routes that don't require the full auth pipeline, checking token expiration.
+
+### User Claims Forwarding
+
+When a user is authenticated, the gateway extracts claims from the token and forwards them to downstream services as HTTP headers:
+
+- `X-User-Id`: The user's Auth0 ID
+- `X-User-Roles`: The user's roles (comma-separated)
+- `X-User-Email`: The user's email
+- `X-User-Name`: The user's display name
+
+This allows microservices to access user information without having to validate tokens themselves.
+
+## YARP Reverse Proxy Configuration
+
+The gateway uses YARP (Yet Another Reverse Proxy) to route requests to the appropriate microservices:
+
+### Route Configuration
+
+Routes are defined in `appsettings.json` under the `ReverseProxy` section:
+
+```json
+"Routes": {
+  "users-route": {
+    "ClusterId": "users-cluster",
+    "Match": {
+      "Path": "/api/users/{**remainder}"
+    },
+    "AuthorizationPolicy": "authenticated"
+  }
+}
+```
+
+Each route specifies:
+- A unique route name
+- The target cluster ID
+- Path matching pattern
+- Optional authorization policy
+
+### Cluster Configuration
+
+Clusters define the destination services:
+
+```json
+"Clusters": {
+  "users-cluster": {
+    "Destinations": {
+      "users-service": {
+        "Address": "http://user-service:8080"
+      }
+    }
+  }
+}
+```
+
+### Route Transforms
+
+The gateway applies custom transforms to requests:
+
+- `ForwardUserClaimsTransform`: Adds user claims as headers to forwarded requests
+
+## Running with Docker
+
+The API Gateway and its dependent services can be started using Docker Compose:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Start only the API Gateway
+docker-compose up -d api-gateway
+```
+
+Environment variables can be provided in a `.env` file:
+
+```
+AUTH0_DOMAIN=your-auth0-domain.auth0.com
+AUTH0_AUDIENCE=https://api.babbly.com
 ``` 

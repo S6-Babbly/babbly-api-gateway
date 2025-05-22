@@ -1,111 +1,106 @@
-name: Babbly API Gateway CI/CD
+name: API Gateway CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main]
   workflow_dispatch:
 
 env:
-  DOTNET_VERSION: '9.0.x'
-  PROJECT_NAME: 'babbly-api-gateway'
-  DOCKER_IMAGE: 'yourdockerhub/babbly-api-gateway'
+  IMAGE_NAME: babbly-api-gateway
 
 jobs:
-  build-and-test:
+  code-quality:
+    name: Code Quality Analysis
     runs-on: ubuntu-latest
+    needs: backend-tests
+    if: (needs.backend-tests.result == 'success' || needs.backend-tests.result == 'skipped')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 100  # Required for SonarCloud
+          fetch-depth: 0 # SonarCloud needs full history
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "temurin"
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: "9.0.x"
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal --configuration Release --collect:"XPlat Code Coverage"
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
         with:
-          name: app-build
-          path: |
-            **/bin/Release/net9.0/
-            !**/bin/Release/net9.0/ref/
-
-  sonarcloud-analysis:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         with:
           args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY_API_GATEWAY }} # Unique project key
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/bin/**,**/obj/**,**/*.test.js,**/*.spec.js
             -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
-            -Dsonar.cs.analyzer.projectOutPaths=.
 
-  docker-build:
-    name: Docker Build and Publish
+  backend-tests:
+    name: Backend Tests
     runs-on: ubuntu-latest
-    needs: [build-and-test, sonarcloud-analysis]
-    if: |
-      always() &&
-      (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped') &&
-      (needs.sonarcloud-analysis.result == 'success' || needs.sonarcloud-analysis.result == 'skipped') &&
-      github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "9.0.x"
 
-      - name: Login to Docker Hub
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
+      - name: Restore dependencies
+        run: dotnet restore ./babbly-api-gateway.csproj
+
+      - name: Build
+        run: dotnet build ./babbly-api-gateway.csproj --no-restore
+
+      - name: Test
+        run: dotnet test ./babbly-api-gateway.csproj --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage --logger "trx;LogFileName=test-results.trx"
+
+  docker-build-and-push:
+    name: Docker Build and Push to Docker Hub
+    runs-on: ubuntu-latest
+    needs: [code-quality, backend-tests]
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      (needs.code-quality.result == 'success' || needs.code-quality.result == 'skipped') &&
+      (needs.backend-tests.result == 'success' || needs.backend-tests.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Docker Hub Login
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create .env file
-        run: |
-          echo "ASPNETCORE_ENVIRONMENT=Development" > .env
-          echo "ConnectionStrings__DefaultConnection=Host=db;Database=babbly-posts;Username=babbly_user;Password=babbly_password;" >> .env
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Build and push Backend
-        run: |
-          # Always build the image
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }} .
-
-          # Only push to DockerHub on main branch
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            docker tag ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:latest
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:${{ github.sha }}
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/babbly-api-gateway:latest
-          fi 
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          # Add build-args for environment variables if needed during build time
+          # build-args: |
+          #   ASPNETCORE_ENVIRONMENT=Production 

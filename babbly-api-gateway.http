@@ -1,6 +1,186 @@
-@babbly_api_gateway_HostAddress = http://localhost:5224
+@babbly_api_gateway_HostAddress = http://localhost:5010
 
-GET {{babbly_api_gateway_HostAddress}}/weatherforecast/
+### User Service
+GET {{babbly_api_gateway_HostAddress}}/api/users
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/users/{id}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/users/auth0/{auth0Id}
+Accept: application/json
+
+###
+POST {{babbly_api_gateway_HostAddress}}/api/users
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com"
+}
+
+###
+PUT {{babbly_api_gateway_HostAddress}}/api/users/{id}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "updateduser"
+}
+
+###
+DELETE {{babbly_api_gateway_HostAddress}}/api/users/{id}
+Accept: application/json
+
+### Post Service
+GET {{babbly_api_gateway_HostAddress}}/api/posts
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/posts/{id}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/posts/user/{userId}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/posts/popular
+Accept: application/json
+
+###
+POST {{babbly_api_gateway_HostAddress}}/api/posts
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "My New Post",
+  "content": "This is the content of my new post."
+}
+
+###
+PUT {{babbly_api_gateway_HostAddress}}/api/posts/{id}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "title": "Updated Post Title"
+}
+
+###
+DELETE {{babbly_api_gateway_HostAddress}}/api/posts/{id}
+Accept: application/json
+
+### Comment Service
+GET {{babbly_api_gateway_HostAddress}}/api/comments
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/comments/{id}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/comments/post/{postId}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/comments/user/{userId}
+Accept: application/json
+
+###
+POST {{babbly_api_gateway_HostAddress}}/api/comments
+Accept: application/json
+Content-Type: application/json
+
+{
+  "postId": "somePostId",
+  "content": "This is a comment."
+}
+
+###
+PUT {{babbly_api_gateway_HostAddress}}/api/comments/{id}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "content": "This is an updated comment."
+}
+
+###
+DELETE {{babbly_api_gateway_HostAddress}}/api/comments/{id}
+Accept: application/json
+
+### Like Service
+GET {{babbly_api_gateway_HostAddress}}/api/likes/{id}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/post/{postId}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/user/{userId}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/post/{postId}/count
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/post/{postId}/users
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/user/{userId}/posts
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/likes/check
+Accept: application/json
+
+###
+POST {{babbly_api_gateway_HostAddress}}/api/likes
+Accept: application/json
+Content-Type: application/json
+
+{
+  "postId": "somePostId"
+}
+
+###
+DELETE {{babbly_api_gateway_HostAddress}}/api/likes/{id}
+Accept: application/json
+
+###
+POST {{babbly_api_gateway_HostAddress}}/api/likes/unlike
+Accept: application/json
+Content-Type: application/json
+
+{
+  "postId": "somePostId"
+}
+
+### Aggregated Endpoints
+GET {{babbly_api_gateway_HostAddress}}/api/feed
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/feed/post/{postId}
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/users/{id}/profile
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/users/{id}/activity
+Accept: application/json
+
+###
+GET {{babbly_api_gateway_HostAddress}}/api/me
 Accept: application/json
 
 ###

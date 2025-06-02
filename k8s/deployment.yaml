@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: babbly-api-gateway:latest
+        image: morrishh/babbly-api-gateway:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

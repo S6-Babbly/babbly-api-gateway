@@ -1,4 +1,4 @@
-name: API Gateway CI/CD Pipeline
+name: API Gateway CI/CD PipelineMore actions
 
 on:
   push:
@@ -76,14 +76,14 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Restore test project dependencies
-        run: dotnet restore ./babbly-api-gateway.Tests/babbly-api-gateway.Tests.csproj
+      - name: Restore dependencies
+        run: dotnet restore ./babbly-api-gateway.csproj
 
-      - name: Build test project
-        run: dotnet build ./babbly-api-gateway.Tests/babbly-api-gateway.Tests.csproj --no-restore
+      - name: Build
+        run: dotnet build ./babbly-api-gateway.csproj --no-restore
 
-      - name: Run tests
-        run: dotnet test ./babbly-api-gateway.Tests/babbly-api-gateway.Tests.csproj --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+      - name: Test
+        run: dotnet test ./babbly-api-gateway.csproj --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
   docker-build-and-push:
     name: Docker Build and Push to Docker Hub
@@ -114,6 +114,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-          # Add build-args for environment variables if needed during build time
-          # build-args: |
-          #   ASPNETCORE_ENVIRONMENT=Production 

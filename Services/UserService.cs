@@ -14,7 +14,7 @@ public class UserService : IUserService
         _configuration = configuration;
     }
 
-    public async Task<User?> GetUserById(Guid id)
+    public async Task<User?> GetUserById(string id)
     {
         try
         {
@@ -87,7 +87,7 @@ public class UserService : IUserService
         return new List<User>();
     }
 
-    public async Task<List<User>> GetFollowers(Guid userId)
+    public async Task<List<User>> GetFollowers(string userId)
     {
         try
         {
@@ -111,7 +111,7 @@ public class UserService : IUserService
         return new List<User>();
     }
 
-    public async Task<List<User>> GetFollowing(Guid userId)
+    public async Task<List<User>> GetFollowing(string userId)
     {
         try
         {

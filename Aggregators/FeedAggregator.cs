@@ -19,13 +19,13 @@ public class FeedAggregator
         _likeService = likeService;
     }
 
-    public async Task<List<AggregatedPost>> GetFeed(int page = 1, int pageSize = 10, Guid? currentUserId = null)
+    public async Task<List<AggregatedPost>> GetFeed(int page = 1, int pageSize = 10, string? currentUserId = null)
     {
         var posts = await _postService.GetPosts(page, pageSize);
         return await AggregatePostsData(posts, currentUserId);
     }
 
-    public async Task<AggregatedPost?> GetPostDetails(Guid postId, Guid? currentUserId = null)
+    public async Task<AggregatedPost?> GetPostDetails(Guid postId, string? currentUserId = null)
     {
         var post = await _postService.GetPostById(postId);
         if (post == null)
@@ -35,9 +35,9 @@ public class FeedAggregator
         var likes = await _likeService.GetLikesByPostId(postId);
         bool isLikedByCurrentUser = false;
 
-        if (currentUserId.HasValue)
+        if (!string.IsNullOrEmpty(currentUserId))
         {
-            isLikedByCurrentUser = await _likeService.HasUserLikedPost(currentUserId.Value, postId);
+            isLikedByCurrentUser = await _likeService.HasUserLikedPost(currentUserId, postId);
         }
 
         return new AggregatedPost
@@ -50,7 +50,7 @@ public class FeedAggregator
         };
     }
 
-    private async Task<List<AggregatedPost>> AggregatePostsData(List<Post> posts, Guid? currentUserId = null)
+    private async Task<List<AggregatedPost>> AggregatePostsData(List<Post> posts, string? currentUserId = null)
     {
         var result = new List<AggregatedPost>();
 
@@ -60,9 +60,9 @@ public class FeedAggregator
             var likes = await _likeService.GetLikesByPostId(post.Id, 1, 5); // Just get first 5 likes
             bool isLikedByCurrentUser = false;
 
-            if (currentUserId.HasValue)
+            if (!string.IsNullOrEmpty(currentUserId))
             {
-                isLikedByCurrentUser = await _likeService.HasUserLikedPost(currentUserId.Value, post.Id);
+                isLikedByCurrentUser = await _likeService.HasUserLikedPost(currentUserId, post.Id);
             }
 
             result.Add(new AggregatedPost

@@ -1,40 +1,25 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+using babbly_api_gateway.Services;
+using System.Security.Claims;
 
 namespace babbly_api_gateway.Middleware;
 
 /// <summary>
-/// Middleware for performing basic JWT token validation without requiring a full authentication cycle.
-/// This can be useful for quick signature checks before passing to microservices.
+/// Middleware for validating JWT tokens using the Auth Service
 /// </summary>
 public class TokenValidationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<TokenValidationMiddleware> _logger;
-    private readonly string _issuer;
-    private readonly string _audience;
+    private readonly IServiceProvider _serviceProvider;
 
     public TokenValidationMiddleware(
         RequestDelegate next, 
         ILogger<TokenValidationMiddleware> logger,
-        IConfiguration configuration)
+        IServiceProvider serviceProvider)
     {
         _next = next;
         _logger = logger;
-        
-        // Get Auth0 configuration
-        var domain = Environment.GetEnvironmentVariable("AUTH0_DOMAIN") ?? 
-                     configuration["Auth0:Domain"] ?? 
-                     throw new InvalidOperationException("Auth0 Domain is not configured.");
-                     
-        var audience = Environment.GetEnvironmentVariable("AUTH0_AUDIENCE") ?? 
-                      configuration["Auth0:Audience"] ?? 
-                      throw new InvalidOperationException("Auth0 Audience is not configured.");
-        
-        _issuer = $"https://{domain}/";
-        _audience = audience;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -44,7 +29,9 @@ public class TokenValidationMiddleware
         if (path.StartsWithSegments("/api") && 
             !path.StartsWithSegments("/api/auth/login") &&
             !path.StartsWithSegments("/api/auth/callback") &&
-            !path.StartsWithSegments("/api/auth/logout"))
+            !path.StartsWithSegments("/api/auth/logout") &&
+            !path.StartsWithSegments("/api/feed") && // Allow feed to be accessed without auth for now
+            !path.StartsWithSegments("/api/health"))
         {
             string? token = null;
             
@@ -59,53 +46,52 @@ public class TokenValidationMiddleware
             {
                 try
                 {
-                    // Create token validation parameters
-                    var validationParameters = new TokenValidationParameters
+                    // Use the auth service to validate the token
+                    using var scope = _serviceProvider.CreateScope();
+                    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+                    
+                    var (isValid, payload, error) = await authService.ValidateTokenWithPayloadAsync(token);
+                    
+                    if (!isValid || payload == null)
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = _issuer,
-                        ValidateAudience = true,
-                        ValidAudience = _audience,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromMinutes(5)
-                    };
-
-                    // Perform basic validation (no signature validation here)
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var jwtToken = tokenHandler.ReadJwtToken(token);
-
-                    // Check token expiration
-                    var now = DateTime.UtcNow;
-                    var expires = jwtToken.ValidTo;
-                    if (expires < now)
-                    {
-                        _logger.LogWarning("Token expired at {ExpiredTime}", expires);
+                        _logger.LogWarning("Token validation failed: {Error}", error);
                         context.Response.StatusCode = 401;
-                        await context.Response.WriteAsJsonAsync(new { error = "Expired token" });
+                        await context.Response.WriteAsJsonAsync(new { error = error ?? "Invalid token" });
                         return;
                     }
 
-                    // Add token claims to headers for downstream services
-                    foreach (var claim in jwtToken.Claims)
+                    // Extract user ID and add to context
+                    if (payload.TryGetValue("sub", out var sub) && sub != null)
                     {
-                        // Don't add all claims, just add specific ones downstream services might need
-                        if (claim.Type == "sub" || claim.Type == "https://babbly.com/roles")
-                        {
-                            var headerName = $"X-User-{claim.Type.Replace("https://babbly.com/", "")}";
-                            context.Request.Headers.Append(headerName, claim.Value);
-                        }
+                        context.Items["CurrentUserId"] = sub.ToString();
+                        
+                        // Add user info to headers for downstream services
+                        context.Request.Headers.Append("X-User-Id", sub.ToString());
                     }
 
-                    _logger.LogInformation("Token validated for subject {Subject}", 
-                        jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value);
+                    // Add roles to headers if available
+                    if (payload.TryGetValue("https://babbly.com/roles", out var roles) && roles != null)
+                    {
+                        context.Request.Headers.Append("X-User-Roles", roles.ToString());
+                    }
+
+                    _logger.LogInformation("Token validated for user {UserId}", sub);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Token validation failed");
                     context.Response.StatusCode = 401;
-                    await context.Response.WriteAsJsonAsync(new { error = "Invalid token" });
+                    await context.Response.WriteAsJsonAsync(new { error = "Token validation error" });
                     return;
                 }
+            }
+            else
+            {
+                // No token provided for protected route
+                _logger.LogWarning("No token provided for protected route: {Path}", path);
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsJsonAsync(new { error = "Authentication required" });
+                return;
             }
         }
 

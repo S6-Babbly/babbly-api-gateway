@@ -187,7 +187,7 @@ Clusters define the destination services:
 "Clusters": {
   "users-cluster": {
     "Destinations": {
-      "users-service": {
+      "user-service": {
         "Address": "http://user-service:8080"
       }
     }

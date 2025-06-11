@@ -100,7 +100,7 @@ builder.Services.AddInMemoryRateLimiting();
 // Register HttpClient for services
 builder.Services.AddHttpClient("UserService", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:users-cluster:Destinations:users-service:Address")!);
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:users-cluster:Destinations:user-service:Address")!);
 });
 
 builder.Services.AddHttpClient("AuthService", client =>
@@ -110,17 +110,17 @@ builder.Services.AddHttpClient("AuthService", client =>
 
 builder.Services.AddHttpClient("PostService", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:posts-cluster:Destinations:posts-service:Address")!);
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:posts-cluster:Destinations:post-service:Address")!);
 });
 
 builder.Services.AddHttpClient("CommentService", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:comments-cluster:Destinations:comments-service:Address")!);
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:comments-cluster:Destinations:comment-service:Address")!);
 });
 
 builder.Services.AddHttpClient("LikeService", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:likes-cluster:Destinations:likes-service:Address")!);
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ReverseProxy:Clusters:likes-cluster:Destinations:like-service:Address")!);
 });
 
 // Register Services

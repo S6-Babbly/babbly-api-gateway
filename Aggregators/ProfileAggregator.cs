@@ -19,7 +19,7 @@ public class ProfileAggregator
         _commentService = commentService;
     }
 
-    public async Task<UserProfile?> GetUserProfileById(Guid userId, int postsPage = 1, int postsPageSize = 10)
+    public async Task<UserProfile?> GetUserProfileById(string userId, int postsPage = 1, int postsPageSize = 10)
     {
         var user = await _userService.GetUserById(userId);
         if (user == null)

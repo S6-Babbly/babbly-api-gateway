@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using babbly_api_gateway.Models;
+using System.Text;
 
 namespace babbly_api_gateway.Services
 {
@@ -19,15 +20,62 @@ namespace babbly_api_gateway.Services
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync("/api/auth/validate");
-
-                return response.IsSuccessStatusCode;
+                var (isValid, _, _) = await ValidateTokenWithPayloadAsync(token);
+                return isValid;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating token");
                 return false;
+            }
+        }
+
+        public async Task<(bool isValid, Dictionary<string, object>? payload, string? error)> ValidateTokenWithPayloadAsync(string token)
+        {
+            try
+            {
+                var requestBody = new { Token = token };
+                var json = JsonSerializer.Serialize(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("/api/auth/validate", content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var validationResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                    
+                    if (validationResponse.TryGetProperty("valid", out var validProperty) && validProperty.GetBoolean())
+                    {
+                        var payload = new Dictionary<string, object>();
+                        
+                        if (validationResponse.TryGetProperty("payload", out var payloadProperty))
+                        {
+                            foreach (var prop in payloadProperty.EnumerateObject())
+                            {
+                                payload[prop.Name] = prop.Value.GetString() ?? prop.Value.ToString();
+                            }
+                        }
+                        
+                        return (true, payload, null);
+                    }
+                    else
+                    {
+                        var error = validationResponse.TryGetProperty("error", out var errorProperty) 
+                            ? errorProperty.GetString() 
+                            : "Token validation failed";
+                        return (false, null, error);
+                    }
+                }
+                else
+                {
+                    return (false, null, $"Auth service error: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating token with payload");
+                return (false, null, $"Validation error: {ex.Message}");
             }
         }
 

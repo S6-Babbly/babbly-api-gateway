@@ -17,35 +17,51 @@ public class FeedController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AggregatedPost>>> GetFeed(
+    public async Task<ActionResult<object>> GetFeed(
         [FromQuery] int page = 1, 
         [FromQuery] int pageSize = 10)
     {
         // Extract current user ID if authenticated
-        Guid? currentUserId = null;
+        string? currentUserId = null;
         if (HttpContext.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is string userId)
         {
-            if (Guid.TryParse(userId, out var parsedUserId))
-            {
-                currentUserId = parsedUserId;
-            }
+            currentUserId = userId;
         }
 
         var feed = await _feedAggregator.GetFeed(page, pageSize, currentUserId);
-        return Ok(feed);
+        
+        // Convert to flattened format expected by frontend
+        var flattenedPosts = feed.Select(aggregatedPost => new FlattenedPost
+        {
+            Id = aggregatedPost.Post.Id,
+            UserId = aggregatedPost.Post.UserId,
+            Content = aggregatedPost.Post.Content,
+            MediaUrl = aggregatedPost.Post.MediaUrl,
+            CreatedAt = aggregatedPost.Post.CreatedAt,
+            TimeAgo = GetTimeAgo(aggregatedPost.Post.CreatedAt),
+            Likes = aggregatedPost.LikesCount,
+            CommentCount = aggregatedPost.Comments?.Count ?? 0,
+            IsLikedByCurrentUser = aggregatedPost.IsLikedByCurrentUser
+        }).ToList();
+        
+        // Return paginated response format expected by frontend
+        return Ok(new
+        {
+            items = flattenedPosts,
+            page = page,
+            pageSize = pageSize,
+            total = flattenedPosts.Count // This is a simplified count, ideally should be total across all pages
+        });
     }
 
     [HttpGet("{postId}")]
-    public async Task<ActionResult<AggregatedPost>> GetPostDetails(Guid postId)
+    public async Task<ActionResult<FlattenedPost>> GetPostDetails(Guid postId)
     {
         // Extract current user ID if authenticated
-        Guid? currentUserId = null;
+        string? currentUserId = null;
         if (HttpContext.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is string userId)
         {
-            if (Guid.TryParse(userId, out var parsedUserId))
-            {
-                currentUserId = parsedUserId;
-            }
+            currentUserId = userId;
         }
 
         var postDetails = await _feedAggregator.GetPostDetails(postId, currentUserId);
@@ -54,6 +70,37 @@ public class FeedController : ControllerBase
             return NotFound();
         }
 
-        return Ok(postDetails);
+        // Convert to flattened format
+        var flattenedPost = new FlattenedPost
+        {
+            Id = postDetails.Post.Id,
+            UserId = postDetails.Post.UserId,
+            Content = postDetails.Post.Content,
+            MediaUrl = postDetails.Post.MediaUrl,
+            CreatedAt = postDetails.Post.CreatedAt,
+            TimeAgo = GetTimeAgo(postDetails.Post.CreatedAt),
+            Likes = postDetails.LikesCount,
+            CommentCount = postDetails.Comments?.Count ?? 0,
+            IsLikedByCurrentUser = postDetails.IsLikedByCurrentUser
+        };
+
+        return Ok(flattenedPost);
+    }
+
+    private static string GetTimeAgo(DateTime createdAt)
+    {
+        var timeSpan = DateTime.UtcNow - createdAt;
+
+        if (timeSpan.TotalDays >= 365)
+            return $"{(int)(timeSpan.TotalDays / 365)}y";
+        if (timeSpan.TotalDays >= 30)
+            return $"{(int)(timeSpan.TotalDays / 30)}mo";
+        if (timeSpan.TotalDays >= 1)
+            return $"{(int)timeSpan.TotalDays}d";
+        if (timeSpan.TotalHours >= 1)
+            return $"{(int)timeSpan.TotalHours}h";
+        if (timeSpan.TotalMinutes >= 1)
+            return $"{(int)timeSpan.TotalMinutes}m";
+        return "now";
     }
 } 

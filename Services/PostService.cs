@@ -1,5 +1,6 @@
 using babbly_api_gateway.Models;
 using System.Text.Json;
+using System.Text;
 
 namespace babbly_api_gateway.Services;
 
@@ -62,7 +63,7 @@ public class PostService : IPostService
         return new List<Post>();
     }
 
-    public async Task<List<Post>> GetPostsByUserId(Guid userId)
+    public async Task<List<Post>> GetPostsByUserId(string userId)
     {
         try
         {
@@ -86,7 +87,7 @@ public class PostService : IPostService
         return new List<Post>();
     }
 
-    public async Task<List<Post>> GetPostsByUserId(Guid userId, int page, int pageSize)
+    public async Task<List<Post>> GetPostsByUserId(string userId, int page, int pageSize)
     {
         try
         {
@@ -110,7 +111,7 @@ public class PostService : IPostService
         return new List<Post>();
     }
 
-    public async Task<List<Post>> GetFeed(Guid userId, int page = 1, int pageSize = 10)
+    public async Task<List<Post>> GetFeed(string userId, int page = 1, int pageSize = 10)
     {
         try
         {
@@ -132,5 +133,38 @@ public class PostService : IPostService
         }
 
         return new List<Post>();
+    }
+
+    public async Task<Post> CreatePost(object postData)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("PostService");
+            var json = JsonSerializer.Serialize(postData);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            var response = await client.PostAsync("/api/posts", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var createdPost = JsonSerializer.Deserialize<Post>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                
+                return createdPost ?? throw new Exception("Failed to deserialize created post");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Post service returned {response.StatusCode}: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in CreatePost: {ex.Message}");
+            throw;
+        }
     }
 } 

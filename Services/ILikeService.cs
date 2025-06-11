@@ -6,6 +6,6 @@ public interface ILikeService
 {
     Task<List<Like>> GetLikesByPostId(Guid postId);
     Task<List<Like>> GetLikesByPostId(Guid postId, int page, int pageSize);
-    Task<List<Like>> GetLikesByUserId(Guid userId);
-    Task<bool> HasUserLikedPost(Guid userId, Guid postId);
+    Task<List<Like>> GetLikesByUserId(string userId);
+    Task<bool> HasUserLikedPost(string userId, Guid postId);
 } 

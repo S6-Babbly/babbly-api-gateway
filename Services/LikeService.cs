@@ -62,7 +62,7 @@ public class LikeService : ILikeService
         return new List<Like>();
     }
 
-    public async Task<List<Like>> GetLikesByUserId(Guid userId)
+    public async Task<List<Like>> GetLikesByUserId(string userId)
     {
         try
         {
@@ -86,7 +86,7 @@ public class LikeService : ILikeService
         return new List<Like>();
     }
 
-    public async Task<bool> HasUserLikedPost(Guid userId, Guid postId)
+    public async Task<bool> HasUserLikedPost(string userId, Guid postId)
     {
         try
         {

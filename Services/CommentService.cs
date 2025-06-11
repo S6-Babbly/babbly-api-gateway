@@ -86,7 +86,7 @@ public class CommentService : ICommentService
         return new List<Comment>();
     }
 
-    public async Task<List<Comment>> GetCommentsByUserId(Guid userId)
+    public async Task<List<Comment>> GetCommentsByUserId(string userId)
     {
         try
         {
@@ -110,7 +110,7 @@ public class CommentService : ICommentService
         return new List<Comment>();
     }
 
-    public async Task<List<Comment>> GetCommentsByUserId(Guid userId, int page, int pageSize)
+    public async Task<List<Comment>> GetCommentsByUserId(string userId, int page, int pageSize)
     {
         try
         {

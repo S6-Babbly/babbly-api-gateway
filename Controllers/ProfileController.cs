@@ -18,7 +18,7 @@ public class ProfileController : ControllerBase
 
     [HttpGet("id/{userId}")]
     public async Task<ActionResult<UserProfile>> GetProfileById(
-        Guid userId, 
+        string userId, 
         [FromQuery] int postsPage = 1, 
         [FromQuery] int postsPageSize = 10)
     {
@@ -57,12 +57,7 @@ public class ProfileController : ControllerBase
             return Unauthorized();
         }
 
-        if (!Guid.TryParse(userId, out var currentUserId))
-        {
-            return BadRequest("Invalid user ID format");
-        }
-
-        var profile = await _profileAggregator.GetUserProfileById(currentUserId, postsPage, postsPageSize);
+        var profile = await _profileAggregator.GetUserProfileById(userId, postsPage, postsPageSize);
         if (profile == null)
         {
             return NotFound();

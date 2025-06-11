@@ -12,22 +12,22 @@ scrape_configs:
     static_configs:
       - targets: ['api-gateway:8080']
 
-  - job_name: 'users-service'
+  - job_name: 'user-service'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['mock-users-service:5001']
+      - targets: ['user-service:8080']
 
-  - job_name: 'posts-service'
+  - job_name: 'post-service'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['mock-posts-service:5002']
+      - targets: ['post-service:8080']
 
-  - job_name: 'comments-service'
+  - job_name: 'comment-service'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['mock-comments-service:5003']
+      - targets: ['comment-service:8080']
 
-  - job_name: 'likes-service'
+  - job_name: 'like-service'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['mock-likes-service:5004'] 
+      - targets: ['like-service:8080'] 

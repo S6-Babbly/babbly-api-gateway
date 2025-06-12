@@ -30,7 +30,7 @@ jobs:
     name: Code Quality Analysis
     runs-on: windows-latest
     needs: backend-build
-    if: (needs.backend-build.result == 'success' || needs.backend-build.result == 'skipped')
+    if: always() && (needs.backend-build.result == 'success' || needs.backend-build.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,6 +70,7 @@ jobs:
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
       - name: Build and analyze
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

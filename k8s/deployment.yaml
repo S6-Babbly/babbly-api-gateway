@@ -32,4 +32,15 @@ spec:
           valueFrom:
             secretKeyRef:
               name: auth0-secrets
-              key: AUTH0_AUDIENCE 
+              key: AUTH0_AUDIENCE
+        # Service URLs for routing
+        - name: USER_SERVICE_URL
+          value: "http://user-service:8081"
+        - name: POST_SERVICE_URL
+          value: "http://post-service:8080"
+        - name: COMMENT_SERVICE_URL
+          value: "http://comment-service:8082"
+        - name: LIKE_SERVICE_URL
+          value: "http://like-service:8083"
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:5001" 

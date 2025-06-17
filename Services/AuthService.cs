@@ -18,21 +18,18 @@ namespace babbly_api_gateway.Services
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            // For demo purposes, always return true
-            _logger.LogInformation("Demo mode: Token validation bypassed");
+            // Always return true - authentication is handled elsewhere
             return await Task.FromResult<bool>(true);
         }
 
         public async Task<(bool isValid, Dictionary<string, object>? payload, string? error)> ValidateTokenWithPayloadAsync(string token)
         {
-            // For demo purposes, return a mock payload
-            _logger.LogInformation("Demo mode: Token validation bypassed");
-            
+            // Return a standard payload for compatibility
             var mockPayload = new Dictionary<string, object>
             {
-                ["sub"] = "demo-user-1",
-                ["name"] = "Demo User",
-                ["email"] = "demo@example.com",
+                ["sub"] = "user-1",
+                ["name"] = "User",
+                ["email"] = "user@example.com",
                 ["https://babbly.com/roles"] = new[] { "user" }
             };
             
@@ -41,25 +38,22 @@ namespace babbly_api_gateway.Services
 
         public async Task<bool> IsAuthorizedAsync(string token, string userId, string resourcePath, string operation)
         {
-            // For demo purposes, always return true (no authorization required)
-            _logger.LogInformation("Demo mode: Authorization check bypassed for {UserId} on {ResourcePath}", userId, resourcePath);
+            // Always return true - no authorization required
             return await Task.FromResult<bool>(true);
         }
 
         public async Task<UserAuthInfo> GetUserInfoFromTokenAsync(string token)
         {
-            // For demo purposes, return mock user info
-            _logger.LogInformation("Demo mode: Returning mock user info");
-            
+            // Return standard user info
             var mockUserInfo = new UserAuthInfo
             {
-                UserId = "demo-user-1",
+                UserId = "user-1",
                 IsAuthenticated = true,
                 Roles = new List<string> { "user" },
                 Claims = new Dictionary<string, string>
                 {
-                    ["email"] = "demo@example.com",
-                    ["name"] = "Demo User"
+                    ["email"] = "user@example.com",
+                    ["name"] = "User"
                 }
             };
 

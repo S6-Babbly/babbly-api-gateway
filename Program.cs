@@ -1,18 +1,11 @@
 using AspNetCoreRateLimit;
 using babbly_api_gateway.Aggregators;
-using babbly_api_gateway.Middleware;
 using babbly_api_gateway.Services;
-using babbly_api_gateway.Transforms;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 using System.Reflection;
-using System.Security.Claims;
-using System;
-using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,55 +16,14 @@ ConfigureLogging(builder);
 var environment = builder.Environment.EnvironmentName;
 builder.Configuration.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
 
-// Configure Auth0 Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    // Try to get Auth0 settings from environment variables first, then fall back to configuration
-    var domain = Environment.GetEnvironmentVariable("AUTH0_DOMAIN") ?? 
-                 builder.Configuration["Auth0:Domain"] ?? 
-                 throw new InvalidOperationException("Auth0 Domain is not configured.");
-                 
-    var audience = Environment.GetEnvironmentVariable("AUTH0_AUDIENCE") ?? 
-                   builder.Configuration["Auth0:Audience"] ?? 
-                   throw new InvalidOperationException("Auth0 Audience is not configured.");
-    
-    options.Authority = $"https://{domain}/";
-    options.Audience = audience;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        NameClaimType = "name",
-        RoleClaimType = "https://babbly.com/roles",
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true
-    };
-});
-
-// Add authorization policies
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("authenticated", policy =>
-        policy.RequireAuthenticatedUser());
-});
-
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register transform providers
-builder.Services.AddSingleton<ForwardUserClaimsTransform>();
-
 // Configure YARP Reverse Proxy
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-    .AddTransforms<ForwardUserClaimsTransform>();
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -155,13 +107,6 @@ app.UseHttpMetrics();
 
 // Rate limiting
 app.UseIpRateLimiting();
-
-// Add token validation middleware
-app.UseTokenValidation();
-
-// Add auth middleware
-app.UseAuthentication();
-app.UseAuthorization();
 
 // Map controllers
 app.MapControllers();

@@ -1,6 +1,5 @@
 using babbly_api_gateway.Aggregators;
 using babbly_api_gateway.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace babbly_api_gateway.Controllers;
@@ -19,14 +18,11 @@ public class FeedController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<object>> GetFeed(
         [FromQuery] int page = 1, 
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? userId = null)
     {
-        // Extract current user ID if authenticated
-        string? currentUserId = null;
-        if (HttpContext.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is string userId)
-        {
-            currentUserId = userId;
-        }
+        // Use provided userId or default for demo (can be null for public feed)
+        string? currentUserId = userId;
 
         var feed = await _feedAggregator.GetFeed(page, pageSize, currentUserId);
         
@@ -55,14 +51,12 @@ public class FeedController : ControllerBase
     }
 
     [HttpGet("{postId}")]
-    public async Task<ActionResult<FlattenedPost>> GetPostDetails(Guid postId)
+    public async Task<ActionResult<FlattenedPost>> GetPostDetails(
+        Guid postId,
+        [FromQuery] string? userId = null)
     {
-        // Extract current user ID if authenticated
-        string? currentUserId = null;
-        if (HttpContext.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is string userId)
-        {
-            currentUserId = userId;
-        }
+        // Use provided userId or default for demo (can be null for public view)
+        string? currentUserId = userId;
 
         var postDetails = await _feedAggregator.GetPostDetails(postId, currentUserId);
         if (postDetails == null)

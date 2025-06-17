@@ -1,4 +1,4 @@
-@babbly_api_gateway_HostAddress = http://localhost:5010
+@babbly_api_gateway_HostAddress = http://4.157.102.60:5010
 
 ### User Service
 GET {{babbly_api_gateway_HostAddress}}/api/users

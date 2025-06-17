@@ -1,6 +1,5 @@
 using babbly_api_gateway.Aggregators;
 using babbly_api_gateway.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace babbly_api_gateway.Controllers;
@@ -47,17 +46,15 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("me")]
-    [Authorize]
     public async Task<ActionResult<UserProfile>> GetMyProfile(
         [FromQuery] int postsPage = 1, 
-        [FromQuery] int postsPageSize = 10)
+        [FromQuery] int postsPageSize = 10,
+        [FromQuery] string? userId = null)
     {
-        if (!HttpContext.Items.TryGetValue("CurrentUserId", out var userIdObj) || userIdObj is not string userId)
-        {
-            return Unauthorized();
-        }
+        // Use provided userId or default for demo
+        var demoUserId = userId ?? "demo-user-1";
 
-        var profile = await _profileAggregator.GetUserProfileById(userId, postsPage, postsPageSize);
+        var profile = await _profileAggregator.GetUserProfileById(demoUserId, postsPage, postsPageSize);
         if (profile == null)
         {
             return NotFound();

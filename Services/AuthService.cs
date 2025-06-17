@@ -18,108 +18,52 @@ namespace babbly_api_gateway.Services
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            try
-            {
-                var (isValid, _, _) = await ValidateTokenWithPayloadAsync(token);
-                return isValid;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating token");
-                return false;
-            }
+            // For demo purposes, always return true
+            _logger.LogInformation("Demo mode: Token validation bypassed");
+            return await Task.FromResult<bool>(true);
         }
 
         public async Task<(bool isValid, Dictionary<string, object>? payload, string? error)> ValidateTokenWithPayloadAsync(string token)
         {
-            try
+            // For demo purposes, return a mock payload
+            _logger.LogInformation("Demo mode: Token validation bypassed");
+            
+            var mockPayload = new Dictionary<string, object>
             {
-                var requestBody = new { Token = token };
-                var json = JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync("/api/auth/validate", content);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var validationResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
-                    
-                    if (validationResponse.TryGetProperty("valid", out var validProperty) && validProperty.GetBoolean())
-                    {
-                        var payload = new Dictionary<string, object>();
-                        
-                        if (validationResponse.TryGetProperty("payload", out var payloadProperty))
-                        {
-                            foreach (var prop in payloadProperty.EnumerateObject())
-                            {
-                                payload[prop.Name] = prop.Value.GetString() ?? prop.Value.ToString();
-                            }
-                        }
-                        
-                        return (true, payload, null);
-                    }
-                    else
-                    {
-                        var error = validationResponse.TryGetProperty("error", out var errorProperty) 
-                            ? errorProperty.GetString() 
-                            : "Token validation failed";
-                        return (false, null, error);
-                    }
-                }
-                else
-                {
-                    return (false, null, $"Auth service error: {response.StatusCode}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating token with payload");
-                return (false, null, $"Validation error: {ex.Message}");
-            }
+                ["sub"] = "demo-user-1",
+                ["name"] = "Demo User",
+                ["email"] = "demo@example.com",
+                ["https://babbly.com/roles"] = new[] { "user" }
+            };
+            
+            return await Task.FromResult<(bool, Dictionary<string, object>?, string?)>((true, mockPayload, null));
         }
 
         public async Task<bool> IsAuthorizedAsync(string token, string userId, string resourcePath, string operation)
         {
-            try
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync($"/api/auth/authorize?userId={userId}&resourcePath={resourcePath}&operation={operation}");
-
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking authorization");
-                return false;
-            }
+            // For demo purposes, always return true (no authorization required)
+            _logger.LogInformation("Demo mode: Authorization check bypassed for {UserId} on {ResourcePath}", userId, resourcePath);
+            return await Task.FromResult<bool>(true);
         }
 
         public async Task<UserAuthInfo> GetUserInfoFromTokenAsync(string token)
         {
-            try
+            // For demo purposes, return mock user info
+            _logger.LogInformation("Demo mode: Returning mock user info");
+            
+            var mockUserInfo = new UserAuthInfo
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync("/api/auth/userinfo");
-
-                if (response.IsSuccessStatusCode)
+                UserId = "demo-user-1",
+                IsAuthenticated = true,
+                Roles = new List<string> { "user" },
+                Claims = new Dictionary<string, string>
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var userInfo = JsonSerializer.Deserialize<UserAuthInfo>(content, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    return userInfo ?? new UserAuthInfo();
+                    ["email"] = "demo@example.com",
+                    ["name"] = "Demo User"
                 }
+            };
 
-                return new UserAuthInfo();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting user info from token");
-                return new UserAuthInfo();
-            }
+            return await Task.FromResult<UserAuthInfo>(mockUserInfo);
         }
     }
 } 

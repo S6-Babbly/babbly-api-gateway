@@ -9,5 +9,5 @@ public interface IPostService
     Task<List<Post>> GetPostsByUserId(string userId);
     Task<List<Post>> GetPostsByUserId(string userId, int page, int pageSize);
     Task<List<Post>> GetFeed(string userId, int page = 1, int pageSize = 10);
-    Task<Post> CreatePost(object postData);
+    Task<Post> CreatePost(object postData, HttpContext httpContext);
 }

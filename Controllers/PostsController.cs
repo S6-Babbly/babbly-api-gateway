@@ -18,25 +18,28 @@ public class PostsController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new post (no authentication required for demo)
+    /// Create a new post (authentication required)
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest request)
     {
         try
         {
-            // Use a default user ID for demo purposes
-            var userId = request.UserId ?? "demo-user-1";
+            // Get authenticated user ID from JWT token headers
+            var userId = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new { error = "Authentication required. User ID not found in token." });
+            }
 
-            // Create the post with the specified or default user ID
+            // Create the post data (PostService will forward user headers)
             var postData = new
             {
-                UserId = userId,
                 Content = request.Content,
-                MediaUrl = request.MediaUrl ?? ""
+                MediaUrl = request.MediaUrl
             };
 
-            var createdPost = await _postService.CreatePost(postData);
+            var createdPost = await _postService.CreatePost(postData, HttpContext);
             
             return Ok(createdPost);
         }
@@ -52,5 +55,4 @@ public class CreatePostRequest
 {
     public string Content { get; set; } = string.Empty;
     public string? MediaUrl { get; set; }
-    public string? UserId { get; set; } // Optional user ID for demo
 } 

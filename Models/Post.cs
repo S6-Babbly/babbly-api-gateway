@@ -28,4 +28,7 @@ public class FlattenedPost
     public int Likes { get; set; } // Like count
     public int CommentCount { get; set; }
     public bool IsLikedByCurrentUser { get; set; }
+    
+    // User information for display
+    public User? User { get; set; }
 } 

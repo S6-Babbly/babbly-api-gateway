@@ -37,7 +37,8 @@ public class FeedController : ControllerBase
             TimeAgo = GetTimeAgo(aggregatedPost.Post.CreatedAt),
             Likes = aggregatedPost.LikesCount,
             CommentCount = aggregatedPost.Comments?.Count ?? 0,
-            IsLikedByCurrentUser = aggregatedPost.IsLikedByCurrentUser
+            IsLikedByCurrentUser = aggregatedPost.IsLikedByCurrentUser,
+            User = aggregatedPost.User
         }).ToList();
         
         // Return paginated response format expected by frontend
@@ -75,7 +76,8 @@ public class FeedController : ControllerBase
             TimeAgo = GetTimeAgo(postDetails.Post.CreatedAt),
             Likes = postDetails.LikesCount,
             CommentCount = postDetails.Comments?.Count ?? 0,
-            IsLikedByCurrentUser = postDetails.IsLikedByCurrentUser
+            IsLikedByCurrentUser = postDetails.IsLikedByCurrentUser,
+            User = postDetails.User
         };
 
         return Ok(flattenedPost);

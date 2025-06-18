@@ -60,7 +60,11 @@ public class FeedAggregator
 
         foreach (var post in posts)
         {
+            Console.WriteLine($"🔄 FeedAggregator: Processing post {post.Id} by user {post.UserId}");
+            
             var user = await _userService.GetUserById(post.UserId);
+            Console.WriteLine($"👤 FeedAggregator: User data for {post.UserId}: {(user != null ? $"Found - {user.Username}" : "NOT FOUND")}");
+            
             var comments = await _commentService.GetCommentsByPostId(post.Id, 1, 3); // Just get first 3 comments
             var likes = await _likeService.GetLikesByPostId(post.Id, 1, 5); // Just get first 5 likes
             bool isLikedByCurrentUser = false;
@@ -70,7 +74,7 @@ public class FeedAggregator
                 isLikedByCurrentUser = await _likeService.HasUserLikedPost(currentUserId, post.Id);
             }
 
-            result.Add(new AggregatedPost
+            var aggregatedPost = new AggregatedPost
             {
                 Post = post,
                 User = user,
@@ -78,7 +82,10 @@ public class FeedAggregator
                 Likes = likes,
                 LikesCount = post.LikesCount, // Trust the count on the post
                 IsLikedByCurrentUser = isLikedByCurrentUser
-            });
+            };
+            
+            Console.WriteLine($"📦 FeedAggregator: Aggregated post has user: {(aggregatedPost.User != null ? "YES" : "NO")}");
+            result.Add(aggregatedPost);
         }
 
         return result;

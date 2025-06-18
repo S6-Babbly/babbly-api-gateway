@@ -20,21 +20,36 @@ public class UserService : IUserService
         {
             var client = _httpClientFactory.CreateClient("UserService");
             // Use auth0 endpoint since posts contain Auth0 user IDs like auth0|12345
-            var response = await client.GetAsync($"/api/users/auth0/{id}");
+            var requestUrl = $"/api/users/auth0/{id}";
+            Console.WriteLine($"🔍 UserService: Fetching user data for ID: {id} from URL: {requestUrl}");
+            
+            var response = await client.GetAsync(requestUrl);
+            Console.WriteLine($"📡 UserService: Response status: {response.StatusCode}");
 
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions
+                Console.WriteLine($"📄 UserService: Response content: {content}");
+                
+                var user = JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
+                
+                Console.WriteLine($"✅ UserService: Successfully parsed user: {user?.Username} (Auth0: {user?.Auth0Id})");
+                return user;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"❌ UserService: Failed to fetch user. Status: {response.StatusCode}, Content: {errorContent}");
             }
         }
         catch (Exception ex)
         {
             // In a real app, we would log this exception
-            Console.WriteLine($"Error in GetUserById: {ex.Message}");
+            Console.WriteLine($"💥 UserService: Error in GetUserById for {id}: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
 
         return null;

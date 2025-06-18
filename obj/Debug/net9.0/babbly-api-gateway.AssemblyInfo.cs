@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("babbly-api-gateway")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0c913c4f7d07594ec3d726cc8fccdffd85c25ea7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db1044cd715a51e40a9b33ef5abb67b3ac200e1e")]
 [assembly: System.Reflection.AssemblyProductAttribute("babbly-api-gateway")]
 [assembly: System.Reflection.AssemblyTitleAttribute("babbly-api-gateway")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

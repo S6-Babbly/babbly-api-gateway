@@ -48,6 +48,6 @@ public class ProfileAggregator
         if (user == null)
             return null;
 
-        return await GetUserProfileById(user.Id, postsPage, postsPageSize);
+        return await GetUserProfileById(user.Auth0Id, postsPage, postsPageSize);
     }
 } 

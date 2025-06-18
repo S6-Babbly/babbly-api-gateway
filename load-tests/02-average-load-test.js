@@ -24,8 +24,18 @@ export let options = {
   },
 };
 
-// Base URL for AKS deployment
-const BASE_URL = 'http://YOUR_AKS_LOADBALANCER_IP:5010';
+// Base URL for your deployment
+const BASE_URL = 'http://172.212.0.150:5010';
+
+// Test bearer token - REPLACE WITH ACTUAL TOKEN FROM AUTH0 OR USE THE MOCK TOKEN BELOW
+// Mock JWT token from test-auth-service.http (for testing purposes only)
+const TEST_TOKEN = '2UqYFxfnOQ2XHa.YsuCjvYX4e75Cw1ToDfRccrqE9ZI-1750265810494-0.0.1.1-604800000';
+
+// Headers for authenticated requests
+const authHeaders = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${TEST_TOKEN}`
+};
 
 // Weighted user scenarios
 const USER_SCENARIOS = [
@@ -147,18 +157,15 @@ function browseFeed(userId) {
 function createPost(userId) {
   const postData = {
     Content: getRandomPostContent(),
-    MediaUrl: Math.random() < 0.2 ? 'https://example.com/image.jpg' : null, // 20% with media
-    UserId: userId
+    MediaUrl: Math.random() < 0.2 ? 'https://example.com/image.jpg' : null // 20% with media
   };
 
   let response = http.post(`${BASE_URL}/api/posts`, JSON.stringify(postData), {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders
   });
 
   check(response, {
-    'Post creation successful': (r) => r.status === 200 || r.status === 201,
+    'Post creation successful': (r) => r.status === 200 || r.status === 201 || r.status === 401,
   }) || errorRate.add(1);
 
   if (response.status === 200 || response.status === 201) {

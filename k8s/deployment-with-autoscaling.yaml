@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+    tier: gateway
+spec:
+  replicas: 2  # Start met 2 voor High Availability
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        tier: gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: morrishh/babbly-api-gateway:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ASPNETCORE_URLS
+          value: "http://+:8080"
+        - name: AUTH0_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secrets
+              key: AUTH0_DOMAIN
+        - name: AUTH0_AUDIENCE
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secrets
+              key: AUTH0_AUDIENCE
+        # Service URLs for routing
+        - name: USER_SERVICE_URL
+          value: "http://user-service:8081"
+        - name: POST_SERVICE_URL
+          value: "http://post-service:8080"
+        - name: COMMENT_SERVICE_URL
+          value: "http://comment-service:8082"
+        - name: LIKE_SERVICE_URL
+          value: "http://like-service:8083"
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:5001"
+        resources:
+          requests:
+            memory: "200Mi"    # Base memory voor .NET Core + YARP
+            cpu: "100m"        # 0.1 CPU cores base (aangepast voor cluster capacity)
+          limits:
+            memory: "400Mi"    # Max memory tijdens load
+            cpu: "500m"        # Max 0.5 CPU core per pod (aangepast voor cluster)
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3 

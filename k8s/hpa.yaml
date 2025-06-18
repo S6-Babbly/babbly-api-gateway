@@ -1,0 +1,48 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-gateway-hpa
+  namespace: default
+  labels:
+    app: api-gateway
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+  minReplicas: 2        # Minimum 2 voor High Availability
+  maxReplicas: 8        # Maximum aangepast voor cluster capacity
+  metrics:
+  # CPU-based scaling
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60  # Lagere threshold voor kritieke service
+  # Memory-based scaling  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60     # Snel reageren op traffic spikes
+      policies:
+      - type: Percent
+        value: 100    # Max 100% increase per stap
+        periodSeconds: 60
+      - type: Pods
+        value: 3      # Of max 3 pods per stap
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300    # Conservatief afschalen (5 minuten)
+      policies:
+      - type: Percent
+        value: 10     # Max 10% decrease per stap
+        periodSeconds: 120
+      selectPolicy: Min 

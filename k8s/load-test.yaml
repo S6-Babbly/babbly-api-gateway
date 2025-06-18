@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: api-gateway-load-test
+  namespace: default
+  labels:
+    app: load-test
+    target: api-gateway
+spec:
+  template:
+    metadata:
+      labels:
+        app: load-test
+        target: api-gateway
+    spec:
+      containers:
+      - name: load-test
+        image: williamyeh/wrk
+        command:
+        - wrk
+        - -t20          # 20 threads
+        - -c200         # 200 connections
+        - -d600s        # 10 minuten test
+        - --latency
+        - --timeout
+        - 30s
+        - http://api-gateway:5010/health
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi" 
+            cpu: "500m"
+      restartPolicy: Never
+  backoffLimit: 0
+---
+# Multi-endpoint load test voor realistische traffic
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: api-gateway-multi-endpoint-test
+  namespace: default
+  labels:
+    app: multi-endpoint-test
+    target: api-gateway
+spec:
+  parallelism: 3  # Run 3 pods simultaneously
+  template:
+    metadata:
+      labels:
+        app: multi-endpoint-test
+        target: api-gateway
+    spec:
+      containers:
+      - name: multi-endpoint-test
+        image: curlimages/curl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Starting multi-endpoint load test..."
+          
+          # Function to make requests to different endpoints
+          make_requests() {
+            local endpoint=$1
+            local count=$2
+            echo "Testing endpoint: $endpoint"
+            
+            for i in $(seq 1 $count); do
+              curl -s -o /dev/null -w "%{http_code} %{time_total}\n" \
+                   -H "Accept: application/json" \
+                   --max-time 30 \
+                   "http://api-gateway:5010$endpoint" || echo "Failed request to $endpoint"
+              sleep 0.1
+            done
+          }
+          
+          # Test verschillende endpoints simultaneously
+          make_requests "/health" 1000 &
+          make_requests "/api/posts" 500 &
+          make_requests "/api/users" 500 &
+          make_requests "/metrics" 200 &
+          
+          wait
+          echo "Multi-endpoint test completed"
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "50m"
+          limits:
+            memory: "64Mi" 
+            cpu: "200m"
+      restartPolicy: Never
+  backoffLimit: 0 

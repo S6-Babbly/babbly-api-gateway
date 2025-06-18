@@ -31,8 +31,8 @@ export let options = {
   },
 };
 
-// Base URL for AKS deployment
-const BASE_URL = 'http://YOUR_AKS_LOADBALANCER_IP:5010';
+// Base URL for your deployment
+const BASE_URL = 'http://172.212.0.150:5010';
 
 // Large user pool for breakpoint testing
 const BREAKPOINT_USERS = [];

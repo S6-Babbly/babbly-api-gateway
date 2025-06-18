@@ -63,19 +63,49 @@ public class TokenValidationMiddleware
                     // Extract user ID and add to context
                     if (payload.TryGetValue("sub", out var sub) && sub != null)
                     {
-                        context.Items["CurrentUserId"] = sub.ToString();
+                        var userId = sub.ToString();
+                        context.Items["CurrentUserId"] = userId;
                         
                         // Add user info to headers for downstream services
-                        context.Request.Headers.Append("X-User-Id", sub.ToString());
+                        context.Request.Headers.Append("X-User-Id", userId);
+                        
+                        _logger.LogInformation("Token validated for user {UserId}", userId);
                     }
 
                     // Add roles to headers if available
                     if (payload.TryGetValue("https://babbly.com/roles", out var roles) && roles != null)
                     {
-                        context.Request.Headers.Append("X-User-Roles", roles.ToString());
+                        var rolesString = string.Empty;
+                        if (roles is string roleStr)
+                        {
+                            rolesString = roleStr;
+                        }
+                        else if (roles is List<string> roleList)
+                        {
+                            rolesString = string.Join(",", roleList);
+                        }
+                        else if (roles is string[] roleArray)
+                        {
+                            rolesString = string.Join(",", roleArray);
+                        }
+                        
+                        if (!string.IsNullOrEmpty(rolesString))
+                        {
+                            context.Request.Headers.Append("X-User-Roles", rolesString);
+                        }
                     }
 
-                    _logger.LogInformation("Token validated for user {UserId}", sub);
+                    // Add email to headers if available
+                    if (payload.TryGetValue("email", out var email) && email != null)
+                    {
+                        context.Request.Headers.Append("X-User-Email", email.ToString());
+                    }
+
+                    // Add name to headers if available
+                    if (payload.TryGetValue("name", out var name) && name != null)
+                    {
+                        context.Request.Headers.Append("X-User-Name", name.ToString());
+                    }
                 }
                 catch (Exception ex)
                 {

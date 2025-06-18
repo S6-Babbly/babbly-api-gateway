@@ -1,0 +1,54 @@
+### Test Authentication Flow
+### This file helps test the Auth0 authentication flow
+
+# 1. Test health endpoint (should work without auth)
+GET http://172.212.0.150:5010/api/health
+Content-Type: application/json
+
+###
+
+# 2. Test feed endpoint (should work without auth for now)
+GET http://172.212.0.150:5010/api/feed?page=1&pageSize=3
+Content-Type: application/json
+
+###
+
+# 3. Test user profile endpoint (requires auth - should fail without token)
+GET http://172.212.0.150:5010/api/users/me
+Content-Type: application/json
+
+###
+
+# 4. Test user profile endpoint with Auth0 token
+# Replace YOUR_AUTH0_TOKEN with actual token from frontend
+GET http://172.212.0.150:5010/api/users/me
+Content-Type: application/json
+Authorization: Bearer YOUR_AUTH0_TOKEN
+
+###
+
+# 5. Test create/update user profile with Auth0 token
+# Replace YOUR_AUTH0_TOKEN with actual token from frontend
+POST http://172.212.0.150:5010/api/users/profile
+Content-Type: application/json
+Authorization: Bearer YOUR_AUTH0_TOKEN
+
+{
+  "auth0Id": "auth0|123456789",
+  "email": "test@example.com",
+  "fullName": "Test User",
+  "firstName": "Test",
+  "lastName": "User",
+  "username": "testuser",
+  "picture": "https://example.com/picture.jpg",
+  "emailVerified": true
+}
+
+###
+
+# 6. Test getting user by Auth0 ID
+GET http://172.212.0.150:5010/api/users/auth0/auth0|123456789
+Content-Type: application/json
+Authorization: Bearer YOUR_AUTH0_TOKEN
+
+### 

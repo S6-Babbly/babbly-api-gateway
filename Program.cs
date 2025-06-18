@@ -1,6 +1,9 @@
 using AspNetCoreRateLimit;
 using babbly_api_gateway.Aggregators;
 using babbly_api_gateway.Services;
+using babbly_api_gateway.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
@@ -86,6 +89,49 @@ builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<FeedAggregator>();
 builder.Services.AddScoped<ProfileAggregator>();
 
+// Configure Auth0 JWT Authentication
+var auth0Domain = builder.Configuration["Auth0:Domain"];
+var auth0Audience = builder.Configuration["Auth0:Audience"];
+
+if (!string.IsNullOrEmpty(auth0Domain) && !string.IsNullOrEmpty(auth0Audience))
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = $"https://{auth0Domain}/";
+            options.Audience = auth0Audience;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = $"https://{auth0Domain}/",
+                ValidAudience = auth0Audience,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+            
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(context.Exception, "JWT authentication failed");
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    var userId = context.Principal?.FindFirst("sub")?.Value;
+                    logger.LogInformation("JWT token validated for user: {UserId}", userId);
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+    builder.Services.AddAuthorization();
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -100,6 +146,13 @@ app.UseSerilogRequestLogging();
 
 // Enable CORS
 app.UseCors("AllowSpecificOrigins");
+
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Custom Token Validation Middleware
+app.UseTokenValidation();
 
 // Prometheus metrics endpoint
 app.UseMetricServer();

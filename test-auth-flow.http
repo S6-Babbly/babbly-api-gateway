@@ -2,7 +2,7 @@
 ### This file helps test the Auth0 authentication flow
 
 # 1. Test health endpoint (should work without auth)
-GET http://172.212.0.150:5010/api/health
+GET http://172.212.0.150:5010/health
 Content-Type: application/json
 
 ###

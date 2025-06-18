@@ -11,12 +11,14 @@ public class FeedAggregator
     private readonly IPostService _postService;
     private readonly ICommentService _commentService;
     private readonly ILikeService _likeService;
+    private readonly IUserService _userService;
 
-    public FeedAggregator(IPostService postService, ICommentService commentService, ILikeService likeService)
+    public FeedAggregator(IPostService postService, ICommentService commentService, ILikeService likeService, IUserService userService)
     {
         _postService = postService;
         _commentService = commentService;
         _likeService = likeService;
+        _userService = userService;
     }
 
     public async Task<List<AggregatedPost>> GetFeed(int page = 1, int pageSize = 10, string? currentUserId = null)
@@ -31,6 +33,7 @@ public class FeedAggregator
         if (post == null)
             return null;
 
+        var user = await _userService.GetUserById(post.UserId);
         var comments = await _commentService.GetCommentsByPostId(postId);
         var likes = await _likeService.GetLikesByPostId(postId);
         bool isLikedByCurrentUser = false;
@@ -43,6 +46,7 @@ public class FeedAggregator
         return new AggregatedPost
         {
             Post = post,
+            User = user,
             Comments = comments,
             Likes = likes,
             LikesCount = likes.Count,
@@ -56,6 +60,7 @@ public class FeedAggregator
 
         foreach (var post in posts)
         {
+            var user = await _userService.GetUserById(post.UserId);
             var comments = await _commentService.GetCommentsByPostId(post.Id, 1, 3); // Just get first 3 comments
             var likes = await _likeService.GetLikesByPostId(post.Id, 1, 5); // Just get first 5 likes
             bool isLikedByCurrentUser = false;
@@ -68,6 +73,7 @@ public class FeedAggregator
             result.Add(new AggregatedPost
             {
                 Post = post,
+                User = user,
                 Comments = comments,
                 Likes = likes,
                 LikesCount = post.LikesCount, // Trust the count on the post

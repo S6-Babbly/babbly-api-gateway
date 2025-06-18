@@ -19,7 +19,8 @@ public class UserService : IUserService
         try
         {
             var client = _httpClientFactory.CreateClient("UserService");
-            var response = await client.GetAsync($"/api/users/{id}");
+            // Use auth0 endpoint since posts contain Auth0 user IDs like auth0|12345
+            var response = await client.GetAsync($"/api/users/auth0/{id}");
 
             if (response.IsSuccessStatusCode)
             {

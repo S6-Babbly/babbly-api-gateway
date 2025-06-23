@@ -2,12 +2,47 @@
 
 This API Gateway serves as the central entry point for the Babbly social media platform microservices.
 
+## Configuration
+
+The API Gateway routes requests to the following backend services:
+
+- User Service (${USER_SERVICE_HOST}:${USER_SERVICE_PORT})
+- Post Service (${POST_SERVICE_HOST}:${POST_SERVICE_PORT})
+- Comment Service (${COMMENT_SERVICE_HOST}:${COMMENT_SERVICE_PORT})
+- Like Service (${LIKE_SERVICE_HOST}:${LIKE_SERVICE_PORT})
+
+### Environment Variables
+
+Required environment variables:
+
+```bash
+# Service Discovery
+USER_SERVICE_URL=http://${USER_SERVICE_HOST}:${USER_SERVICE_PORT}
+POST_SERVICE_URL=http://${POST_SERVICE_HOST}:${POST_SERVICE_PORT}
+COMMENT_SERVICE_URL=http://${COMMENT_SERVICE_HOST}:${COMMENT_SERVICE_PORT}
+LIKE_SERVICE_URL=http://${LIKE_SERVICE_HOST}:${LIKE_SERVICE_PORT}
+
+# Auth0 Configuration
+AUTH0_DOMAIN=${AUTH0_DOMAIN}
+AUTH0_AUDIENCE=${AUTH0_AUDIENCE}
+
+# CORS Configuration
+CORS_ORIGINS=${CORS_ORIGINS}
+
+# Port Configuration
+ASPNETCORE_URLS=http://0.0.0.0:${API_GATEWAY_PORT}
+```
+
+See `env-template.txt` in the root directory for complete configuration examples.
+
 ## Features
 
-- **Reverse Proxy**: Routes traffic to the appropriate microservices
-- **Rate Limiting**: Protects APIs from excessive traffic
-- **Aggregation**: Combines data from multiple microservices into unified responses
-- **Metrics**: Prometheus integration for monitoring
+- **Service Routing**: Routes API requests to appropriate microservices
+- **Authentication**: JWT token validation via Auth0
+- **CORS**: Configurable cross-origin resource sharing
+- **Health Checks**: Monitors backend service availability
+- **Aggregation**: Combines data from multiple services for complex queries
+- **Load Balancing**: Distributes requests across service instances
 
 ## Architecture
 
@@ -31,50 +66,31 @@ The API Gateway connects to the following microservices:
 - `/api/profiles/id/{userId}` - Get a user profile by ID
 - `/api/profiles/username/{username}` - Get a user profile by username
 
-## Setup
+## Getting Started
 
-### Prerequisites
-- .NET 9.0 SDK
+1. Clone the repository
+2. Install .NET 8 SDK
+3. Configure environment variables (see above)
+4. Run the application: `dotnet run`
 
-### Running the Project Locally
-```bash
-# Build the project
-dotnet build
+The API will be available at `http://${API_GATEWAY_HOST}:${API_GATEWAY_PORT}` by default.
 
-# Run the project
-dotnet run
-```
+## Docker Deployment
 
-The API will be available at http://localhost:5224 by default.
+When running with Docker Compose, the API Gateway will be available at `http://${API_GATEWAY_HOST}:${API_GATEWAY_PORT}`.
 
-### Running with Docker
+## Monitoring
 
-To run the gateway with Docker:
+The gateway exposes the following monitoring endpoints:
 
-```bash
-# Build the Docker image
-docker build -t babbly-api-gateway .
+- Health Check: `/health`
+- Metrics: `/metrics` (Prometheus format)
 
-# Run the container
-docker run -p 5010:8080 babbly-api-gateway
-```
+Integration with monitoring stack:
+- Prometheus: `http://${PROMETHEUS_HOST}:${PROMETHEUS_PORT}`
+- Grafana: `http://${GRAFANA_HOST}:${GRAFANA_PORT}`
 
-### Running the Complete Application with Docker Compose
-
-To run the entire Babbly application with all microservices:
-
-```bash
-# Navigate to the root directory containing docker-compose.yml
-cd ..
-
-# Start all services
-docker-compose up -d
-
-# Check logs
-docker-compose logs -f api-gateway
-```
-
-When running with Docker Compose, the API Gateway will be available at http://localhost:5010.
+**Security Note**: Never expose monitoring endpoints publicly in production. Use proper network segmentation and authentication.
 
 ## CI/CD Pipeline
 

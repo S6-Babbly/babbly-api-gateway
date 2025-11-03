@@ -21,6 +21,20 @@ ConfigureLogging(builder);
 var environment = builder.Environment.EnvironmentName;
 builder.Configuration.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
 
+// Override Auth0 settings from environment variables if present
+var auth0DomainEnv = Environment.GetEnvironmentVariable("AUTH0_DOMAIN");
+var auth0AudienceEnv = Environment.GetEnvironmentVariable("AUTH0_AUDIENCE");
+
+if (!string.IsNullOrEmpty(auth0DomainEnv))
+{
+    builder.Configuration["Auth0:Domain"] = auth0DomainEnv;
+}
+
+if (!string.IsNullOrEmpty(auth0AudienceEnv))
+{
+    builder.Configuration["Auth0:Audience"] = auth0AudienceEnv;
+}
+
 // Add services to the container
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
